@@ -1,5 +1,4 @@
 
-
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
@@ -7,12 +6,10 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext"; // Импортируем наш новый провайдер
-import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://helpmame.ru'),
   title: "HelpMame - Помощь мамам",
   description: "Онлайн и оффлайн помощь для мам",
   icons: {
@@ -40,7 +37,6 @@ export default function RootLayout({
             <Footer />
           </CartProvider>
         </AuthProvider>
-        <Analytics />
         </body>
     </html>
   );
