@@ -1,5 +1,5 @@
 {
-    "editor.defaultFoldingRangeProvider": "Codeium.codeium",
+    "editor.defaultFoldingRangeProvider": null,
     "terminal.integrated.suggest.providers": {
     
         "terminal-suggest": true,

@@ -13,12 +13,12 @@ interface BoardItemCardProps {
 }
 
 export default function BoardItemCard({ id, imageUrls, title, price }: BoardItemCardProps) {
-  const { 
-    addToCart, 
-    removeFromCart, 
-    isItemInCart, 
-    toggleFavorite, 
-    isItemInFavorites 
+  const {
+    addToCart,
+    removeFromCart,
+    isItemInCart,
+    toggleFavorite,
+    isItemInFavorites
   } = useCart();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -41,47 +41,50 @@ export default function BoardItemCard({ id, imageUrls, title, price }: BoardItem
 
   const handleCartClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     isItemInCart(id) ? removeFromCart(id) : addToCart(item);
   };
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     toggleFavorite(item);
   };
 
   return (
-    <Link href={`/board/${id}`} className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+    <Link href={`/board/${id}`} className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 border border-gray-200 h-full">
       <div className="relative group">
-        <Image 
-          src={validImageUrls[currentIndex]}
-          alt={title} 
-          width={300} 
-          height={200} 
-          className="w-full h-48 object-cover transition-transform duration-300 transform-gpu"
-          onError={(e) => { e.currentTarget.src = '/placeholder.jpg'; }}
-        />
+        <div className="w-full h-48 relative">
+          <Image 
+            src={validImageUrls[currentIndex]}
+            alt={title} 
+            layout="fill"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => { e.currentTarget.src = '/placeholder.jpg'; }}
+          />
+        </div>
 
         {hasMultipleImages && (
           <>
             <button 
               onClick={handlePrev}
-              className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/40 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-black/60"
+              className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/70 focus:outline-none focus:ring-2 focus:ring-white"
               aria-label="Previous image"
             >
               <Image src="/icons/back.svg" alt="Назад" width={20} height={20} />
             </button>
             <button 
               onClick={handleNext}
-              className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/40 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-black/60"
+              className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/70 focus:outline-none focus:ring-2 focus:ring-white"
               aria-label="Next image"
             >
               <Image src="/icons/next.svg" alt="Вперед" width={20} height={20} />
             </button>
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
               {validImageUrls.map((_, index) => (
                 <span
                   key={index}
-                  className={`block w-2 h-2 rounded-full ${currentIndex === index ? 'bg-white' : 'bg-white/50'}`}
+                  className={`block w-2.5 h-2.5 rounded-full transition-colors duration-200 ${currentIndex === index ? 'bg-white' : 'bg-white/60'}`}
                 />
               ))}
             </div>
@@ -90,23 +93,26 @@ export default function BoardItemCard({ id, imageUrls, title, price }: BoardItem
 
         <button 
           onClick={handleFavoriteClick} 
-          className="absolute top-2 right-2 p-0.5 rounded-full bg-white shadow-md transition-transform duration-200 hover:scale-110 z-10"
+          className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-md transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-rose-500 z-10"
+          aria-label="Add to favorites"
         >
           <Image 
             src={isItemInFavorites(id) ? '/icons/like-2.svg' : '/icons/like-1.svg'} 
             alt="Add to favorites" 
-            width={28} 
-            height={28} 
+            width={24} 
+            height={24} 
           />
         </button>
       </div>
-      {/* --- ИЗМЕНЕНО: Flexbox-выравнивание убрано --- */}
-      <div className="p-4">
-        <h3 className="text-lg font-semibold truncate">{title}</h3>
-        <p className="text-gray-600 mt-1 font-bold text-xl">{price.toLocaleString('ru-RU')} руб.</p>
+      
+      <div className="p-4 flex flex-col flex-grow gap-2">
+        <h3 className="text-base font-semibold text-gray-800 h-12 line-clamp-2">{title}</h3>
+        <div className="flex-grow" />
+        <p className="text-gray-900 font-bold text-lg">{price.toLocaleString('ru-RU')} руб.</p>
+        
         <button 
           onClick={handleCartClick}
-          className={`mt-4 w-full py-2 px-4 rounded-lg font-semibold transition-colors ${isItemInCart(id) ? 'bg-gray-200 text-gray-800' : 'bg-rose-500 text-white hover:bg-rose-600'}`}>
+          className={`w-full py-2 px-4 mt-2 rounded-lg font-semibold transition-all duration-200 ease-in-out transform hover:-translate-y-0.5 ${isItemInCart(id) ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-rose-500 text-white hover:bg-rose-600'}`}>
           {isItemInCart(id) ? 'Убрать из корзины' : 'Добавить в корзину'}
         </button>
       </div>

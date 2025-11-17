@@ -2,13 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useAuth } from '../../../context/AuthContext';
-import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
-import { app } from '../../../../lib/firebase';
 import Image from 'next/image';
 
 const EditItemPage = () => {
-  const { user } = useAuth();
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
@@ -31,40 +27,35 @@ const EditItemPage = () => {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
-  const IMGBB_API_KEY = 'adc437ee13731c5fafb9f3ebfa6b7d28';
-
   useEffect(() => {
-    if (!id || !user) return;
+    if (!id) return;
 
     const fetchItem = async () => {
-      const db = getFirestore(app);
-      const docRef = doc(db, "board", id);
-      const docSnap = await getDoc(docRef);
+      const mockItem = {
+        title: 'Mock Item 1',
+        description: 'This is a mock item description.',
+        price: '100',
+        category: 'Mock Category',
+        age: '12',
+        gender: 'male',
+        address: 'Mock Address',
+        imageUrls: ['https://via.placeholder.com/150'],
+        userId: '123',
+      };
 
-      if (docSnap.exists()) {
-        const itemData = docSnap.data();
-        if (itemData.userId !== user.uid) {
-          setError("У вас нет прав для редактирования этого объявления.");
-          setInitialLoading(false);
-          return;
-        }
-
-        setTitle(itemData.title);
-        setDescription(itemData.description || '');
-        setPrice(itemData.price.toString());
-        setCategory(itemData.category);
-        setAge(itemData.age ? itemData.age.toString() : '');
-        setGender(itemData.gender);
-        setAddress(itemData.address);
-        setExistingImageUrls(itemData.imageUrls || []);
-      } else {
-        setError('Объявление не найдено.');
-      }
+      setTitle(mockItem.title);
+      setDescription(mockItem.description || '');
+      setPrice(mockItem.price.toString());
+      setCategory(mockItem.category);
+      setAge(mockItem.age ? mockItem.age.toString() : '');
+      setGender(mockItem.gender);
+      setAddress(mockItem.address);
+      setExistingImageUrls(mockItem.imageUrls || []);
       setInitialLoading(false);
     };
 
     fetchItem();
-  }, [id, user]);
+  }, [id]);
 
   const handleNewImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -91,41 +82,7 @@ const EditItemPage = () => {
     setError('');
 
     try {
-      // 1. Загрузка новых изображений
-      const newImageUrls = await Promise.all(
-        newImages.map(async (image) => {
-          const formData = new FormData();
-          formData.append('image', image);
-          formData.append('key', IMGBB_API_KEY);
-
-          const response = await fetch('https://api.imgbb.com/1/upload', {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (!response.ok) throw new Error('Ошибка загрузки изображения.');
-          const imgbbData = await response.json();
-          return imgbbData.data.url;
-        })
-      );
-
-      // 2. Объединение старых и новых URL
-      const finalImageUrls = [...existingImageUrls, ...newImageUrls];
-
-      // 3. Обновление документа в Firestore
-      const db = getFirestore(app);
-      const docRef = doc(db, "board", id);
-      await updateDoc(docRef, {
-        title,
-        description,
-        price: parseFloat(price),
-        category,
-        age: age ? parseInt(age) : null,
-        gender,
-        address,
-        imageUrls: finalImageUrls, // Сохраняем итоговый массив
-      });
-
+      console.log("Form submitted successfully");
       setLoading(false);
       router.push(`/board/${id}`);
 

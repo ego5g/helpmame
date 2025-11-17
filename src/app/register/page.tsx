@@ -1,24 +1,15 @@
 'use client';
 
-import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 
 const RegisterPage = () => {
-  const { user, emailSignUp } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [error, setError] = useState('');
-
-  // Если пользователь уже вошел, перенаправляем его на главную
-  useEffect(() => {
-    if (user) {
-      router.push('/');
-    }
-  }, [user, router]);
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,26 +20,7 @@ const RegisterPage = () => {
       return;
     }
 
-    try {
-      await emailSignUp(email, password);
-      router.push('/'); // <-- Немедленный редирект на главную
-    } catch (error: any) {
-      console.error(error);
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          setError('Этот email уже зарегистрирован.');
-          break;
-        case 'auth/invalid-email':
-          setError('Некорректный формат email.');
-          break;
-        case 'auth/weak-password':
-          setError('Пароль слишком слабый. Он должен содержать не менее 6 символов.');
-          break;
-        default:
-          setError('Произошла ошибка при регистрации.');
-          break;
-      }
-    }
+    router.push('/');
   };
 
   return (

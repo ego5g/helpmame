@@ -4,10 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getFirestore, doc, getDoc, deleteDoc, Timestamp } from "firebase/firestore";
-import { useAuth } from '../../context/AuthContext';
 import { useCart, BoardItem } from '../../context/CartContext';
-import { app } from '../../../lib/firebase';
 
 interface BoardItemDetails {
     id: string;
@@ -20,13 +17,12 @@ interface BoardItemDetails {
     gender: string;
     address: string;
     imageUrls: string[];
-    createdAt: Timestamp;
+    createdAt: any;
 }
 
 const ItemDetailsPage = () => {
     const params = useParams();
     const router = useRouter();
-    const { user } = useAuth();
     const { 
         addToCart, 
         removeFromCart, 
@@ -41,20 +37,26 @@ const ItemDetailsPage = () => {
     const [error, setError] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const user = { uid: '123' }; // Mock user
 
     useEffect(() => {
         if (!id) return;
         const fetchItem = async () => {
             try {
-                const db = getFirestore(app);
-                const docRef = doc(db, "board", id);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = { id: docSnap.id, ...docSnap.data() } as BoardItemDetails;
-                    setItem(data);
-                } else {
-                    setError('Объявление не найдено.');
-                }
+                const mockItem = {
+                    id: '1',
+                    userId: '123',
+                    title: 'Mock Item 1',
+                    description: 'This is a mock item description.',
+                    price: 100,
+                    category: 'Mock Category',
+                    age: 12,
+                    gender: 'male',
+                    address: 'Mock Address',
+                    imageUrls: ['https://via.placeholder.com/150'],
+                    createdAt: { seconds: Date.now() / 1000 },
+                };
+                setItem(mockItem);
             } catch (err) {
                 console.error(err);
                 setError('Произошла ошибка при загрузке данных.');
@@ -69,19 +71,11 @@ const ItemDetailsPage = () => {
         if (!item || !user || user.uid !== item.userId) return;
         if (window.confirm("Вы уверены, что хотите удалить это объявление?")) {
             setIsDeleting(true);
-            try {
-                const db = getFirestore(app);
-                await deleteDoc(doc(db, "board", id));
-                router.push('/board');
-            } catch (err) {
-                console.error("Ошибка при удалении: ", err);
-                setError("Не удалось удалить объявление. Попробуйте снова.");
-                setIsDeleting(false);
-            }
+            router.push('/board');
         }
     };
     
-    const formatTimestamp = (timestamp: Timestamp) => {
+    const formatTimestamp = (timestamp: any) => {
         if (!timestamp) return 'Дата не указана';
         return new Date(timestamp.seconds * 1000).toLocaleString('ru-RU', {
             year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -120,7 +114,6 @@ const ItemDetailsPage = () => {
             <div className="max-w-4xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     
-                    {/* --- ИЗМЕНЕНО: Комбинированный блок слайдера и галереи --- */}
                     <div>
                         <div className="relative w-full h-96 group mb-4">
                             <Image 
@@ -160,7 +153,6 @@ const ItemDetailsPage = () => {
                             )}
                         </div>
                         
-                        {/* --- ИЗМЕНЕНО: Галерея миниатюр возвращена --- */}
                         {hasMultipleImages && (
                             <div className="flex space-x-2 overflow-x-auto p-1">
                                 {validImageUrls.map((url, index) => (

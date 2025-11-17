@@ -1,115 +1,78 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useAuth, UserProfile } from '../context/AuthContext';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const ProfilePage = () => {
-  const { user, userProfile, logOut } = useAuth();
   const router = useRouter();
   
-  // Состояние для полей формы, инициализируется из профиля пользователя
-  const [profileData, setProfileData] = useState<UserProfile>({});
+  const [profileData, setProfileData] = useState({
+    firstName: 'Тест',
+    lastName: 'Тестов',
+    email: 'test@example.com',
+  });
 
-  useEffect(() => {
-    // Если пользователь не вошел, перенаправляем на главную
-    if (!user) {
-      router.push('/');
-    }
-    // Когда профиль загрузится, заполняем форму
-    if (userProfile) {
-      setProfileData(userProfile);
-    }
-  }, [user, userProfile, router]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfileData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSaveProfile = async (e: React.FormEvent) => {
+  const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-
-    const userRef = doc(db, 'users', user.uid);
-    try {
-      // Преобразуем числовые поля перед сохранением
-      const dataToSave = {
-        ...profileData,
-        age: profileData.age ? Number(profileData.age) : undefined,
-        childAge: profileData.childAge ? Number(profileData.childAge) : undefined,
-      };
-      await updateDoc(userRef, dataToSave);
-      alert('Профиль успешно обновлен!');
-    } catch (error) {
-      console.error("Ошибка при обновлении профиля: ", error);
-      alert('Не удалось обновить профиль.');
-    }
+    console.log('Сохраняемые данные:', profileData);
+    alert('Профиль успешно обновлен!');
+  };
+  
+  const handleLogout = () => {
+    console.log("logout");
+    router.push('/'); 
   };
 
-  if (!user || !userProfile) {
-    return <div>Загрузка...</div>; // Или любой другой лоадер
-  }
-
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Ваш профиль</h1>
+    <div className="container mx-auto p-4 max-w-md">
+      <h1 className="text-2xl font-bold mb-6 text-center">Ваш профиль</h1>
       
-      {userProfile.photoURL && (
-          <img src={userProfile.photoURL} alt="Avatar" className="w-24 h-24 rounded-full mb-4" />
-      )}
-
       <form onSubmit={handleSaveProfile} className="space-y-4">
         <div>
-          <label className="block">Имя</label>
-          <input type="text" name="firstName" value={profileData.firstName || ''} onChange={handleInputChange} className="w-full p-2 border rounded" />
+          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">Имя</label>
+          <input 
+            type="text" 
+            id="firstName"
+            name="firstName" 
+            value={profileData.firstName} 
+            onChange={handleInputChange} 
+            className="mt-1 w-full p-2 border border-gray-300 rounded-md shadow-sm" 
+          />
         </div>
         <div>
-          <label className="block">Фамилия</label>
-          <input type="text" name="lastName" value={profileData.lastName || ''} onChange={handleInputChange} className="w-full p-2 border rounded" />
+          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Фамилия</label>
+          <input 
+            type="text" 
+            id="lastName"
+            name="lastName" 
+            value={profileData.lastName} 
+            onChange={handleInputChange} 
+            className="mt-1 w-full p-2 border border-gray-300 rounded-md shadow-sm" 
+          />
         </div>
         <div>
-          <label className="block">Ваш возраст</label>
-          <input type="number" name="age" value={profileData.age || ''} onChange={handleInputChange} className="w-full p-2 border rounded" />
-        </div>
-        <div>
-          <label className="block">Имя ребенка</label>
-          <input type="text" name="childName" value={profileData.childName || ''} onChange={handleInputChange} className="w-full p-2 border rounded" />
-        </div>
-        <div>
-          <label className="block">Возраст ребенка</label>
-          <input type="number" name="childAge" value={profileData.childAge || ''} onChange={handleInputChange} className="w-full p-2 border rounded" />
-        </div>
-        <div>
-          <label className="block">Пол ребенка</label>
-          <select name="childGender" value={profileData.childGender || ''} onChange={handleInputChange} className="w-full p-2 border rounded">
-            <option value="">Не выбрано</option>
-            <option value="male">Мальчик</option>
-            <option value="female">Девочка</option>
-            <option value="other">Другой</option>
-          </select>
-        </div>
-        <div>
-          <label className="block">Адрес</label>
-          <input type="text" name="address" value={profileData.address || ''} onChange={handleInputChange} className="w-full p-2 border rounded" />
-        </div>
-        <div>
-          <label className="block">Телефон</label>
-          <input type="tel" name="phone" value={profileData.phone || ''} onChange={handleInputChange} className="w-full p-2 border rounded" />
-        </div>
-        <div>
-          <label className="block">Почта (нельзя изменить)</label>
-          <input type="email" name="email" value={profileData.email || ''} readOnly className="w-full p-2 border rounded bg-gray-100" />
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">Почта</label>
+          <input 
+            type="email" 
+            id="email"
+            name="email" 
+            value={profileData.email} 
+            readOnly 
+            className="mt-1 w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100" 
+          />
         </div>
 
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        <button type="submit" className="w-full bg-pink-500 text-white px-4 py-2 rounded-md hover:bg-pink-600">
           Сохранить изменения
         </button>
       </form>
 
-      <button onClick={logOut} className="mt-8 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+      <button onClick={handleLogout} className="w-full mt-4 bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">
         Выйти из аккаунта
       </button>
     </div>

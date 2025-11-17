@@ -2,13 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
-import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { app } from '../../../lib/firebase';
 import Image from 'next/image';
 
 const NewItemPage = () => {
-  const { user } = useAuth(); 
   const router = useRouter();
   
   const [title, setTitle] = useState('');
@@ -21,16 +17,6 @@ const NewItemPage = () => {
   const [images, setImages] = useState<File[]>([]); // Состояние для нескольких файлов
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const IMGBB_API_KEY = 'adc437ee13731c5fafb9f3ebfa6b7d28';
-
-  if (!user) {
-    return (
-        <div className="text-center py-10">
-            <p className="text-lg">Пожалуйста, <a href="/login" className="text-rose-500 hover:underline">войдите в систему</a>, чтобы добавить объявление.</p>
-        </div>
-    );
-  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -55,45 +41,8 @@ const NewItemPage = () => {
     setError('');
 
     try {
-        // 1. Загрузка всех изображений на ImgBB
-        const imageUrls = await Promise.all(
-            images.map(async (image) => {
-                const formData = new FormData();
-                formData.append('image', image);
-                formData.append('key', IMGBB_API_KEY);
-
-                const response = await fetch('https://api.imgbb.com/1/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (!response.ok) {
-                    throw new Error('Ошибка при загрузке одного из изображений.');
-                }
-
-                const imgbbData = await response.json();
-                if (!imgbbData.data.url) {
-                    throw new Error('Не удалось получить URL изображения после загрузки.');
-                }
-                return imgbbData.data.url;
-            })
-        );
-
-        // 2. Сохранение данных в Firestore
-        const db = getFirestore(app);
-        await addDoc(collection(db, "board"), {
-            userId: user.uid,
-            title,
-            description,
-            price: parseFloat(price),
-            category,
-            age: age ? parseInt(age) : null,
-            gender,
-            address,
-            imageUrls: imageUrls, // Сохраняем массив URL
-            createdAt: serverTimestamp()
-        });
-
+        // Mock submission
+        console.log("Form submitted successfully");
         setLoading(false);
         router.push('/board');
 

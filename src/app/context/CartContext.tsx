@@ -1,9 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase'; 
-import { useAuth } from './AuthContext';
 
 // Определяем единый тип для товара
 export interface BoardItem {
@@ -33,65 +30,27 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 // Создаем компонент-"провайдер"
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuth(); // Получаем текущего пользователя
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   
   // Состояния для корзины и избранного теперь инициализируются пустыми
   const [cartItems, setCartItems] = useState<BoardItem[]>([]);
   const [favoriteItems, setFavoriteItems] = useState<BoardItem[]>([]);
 
-  // Эффект для загрузки и синхронизации данных при изменении пользователя
-  useEffect(() => {
-    const fetchData = async () => {
-      if (user) {
-        setLoading(true);
-        const cartRef = doc(db, 'carts', user.uid);
-        const docSnap = await getDoc(cartRef);
-
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setCartItems(data.cartItems || []);
-          setFavoriteItems(data.favoriteItems || []);
-        } else {
-          // Если документа нет, создаем его с пустыми массивами
-          await setDoc(cartRef, { cartItems: [], favoriteItems: [] });
-          setCartItems([]);
-          setFavoriteItems([]);
-        }
-        setLoading(false);
-      } else {
-        // Если пользователя нет, очищаем состояния и выключаем загрузку
-        setCartItems([]);
-        setFavoriteItems([]);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [user]);
-
   // --- Функции для Корзины ---
-  const addToCart = async (item: BoardItem) => {
-    if (!user) return; // Не добавляем, если пользователь не авторизован
+  const addToCart = (item: BoardItem) => {
     const newCartItems = [...cartItems, item];
     setCartItems(newCartItems);
-    const cartRef = doc(db, 'carts', user.uid);
-    await updateDoc(cartRef, { cartItems: newCartItems });
   };
 
-  const removeFromCart = async (itemId: string) => {
-    if (!user) return;
+  const removeFromCart = (itemId: string) => {
     const newCartItems = cartItems.filter(item => item.id !== itemId);
     setCartItems(newCartItems);
-    const cartRef = doc(db, 'carts', user.uid);
-    await updateDoc(cartRef, { cartItems: newCartItems });
   };
 
   const isItemInCart = (itemId: string) => cartItems.some(item => item.id === itemId);
 
   // --- Функции для Избранного ---
-  const toggleFavorite = async (item: BoardItem) => {
-    if (!user) return;
+  const toggleFavorite = (item: BoardItem) => {
     let newFavoriteItems;
     if (isItemInFavorites(item.id)) {
       newFavoriteItems = favoriteItems.filter(fav => fav.id !== item.id);
@@ -99,8 +58,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       newFavoriteItems = [...favoriteItems, item];
     }
     setFavoriteItems(newFavoriteItems);
-    const cartRef = doc(db, 'carts', user.uid);
-    await updateDoc(cartRef, { favoriteItems: newFavoriteItems });
   };
 
   const isItemInFavorites = (itemId: string) => favoriteItems.some(item => item.id === itemId);

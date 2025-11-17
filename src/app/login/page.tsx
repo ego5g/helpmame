@@ -1,34 +1,14 @@
 'use client';
 
-import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 const LoginPage = () => {
-  const { user, googleSignIn, emailSignIn } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-
-  // Если пользователь уже вошел, перенаправляем его на главную
-  useEffect(() => {
-    if (user) {
-      router.push('/');
-    }
-  }, [user, router]);
-
-  const handleGoogleSignIn = async () => {
-    try {
-      setError('');
-      await googleSignIn();
-      router.push('/'); // <-- Немедленный редирект на главную
-    } catch (error) {
-      console.error("Login page error (Google): ", error);
-      setError('Не удалось войти с помощью Google.');
-    }
-  };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,26 +17,7 @@ const LoginPage = () => {
       setError('Пожалуйста, введите email и пароль.');
       return;
     }
-    try {
-      await emailSignIn(email, password);
-      router.push('/'); // <-- Немедленный редирект на главную
-    } catch (error: any) {
-      console.error(error);
-      switch (error.code) {
-        case 'auth/user-not-found':
-          setError('Пользователь с таким email не найден.');
-          break;
-        case 'auth/wrong-password':
-          setError('Неверный пароль.');
-          break;
-        case 'auth/invalid-email':
-          setError('Некорректный формат email.');
-          break;
-        default:
-          setError('Произошла ошибка при входе.');
-          break;
-      }
-    }
+    router.push('/');
   };
 
   return (
@@ -110,7 +71,7 @@ const LoginPage = () => {
         </div>
 
         <button 
-          onClick={handleGoogleSignIn}
+          onClick={() => {}}
           className="w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg flex items-center justify-center hover:bg-gray-50 focus:outline-none focus:ring focus:ring-gray-200"
         >
           <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google" className="h-5 mr-3" />

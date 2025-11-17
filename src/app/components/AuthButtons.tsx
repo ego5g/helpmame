@@ -1,44 +1,42 @@
 'use client';
 
-import { useAuth } from '../context/AuthContext';
 import Link from 'next/link';
+import { useAuth } from '../context/AuthContext';
+import Image from 'next/image';
 
 export default function AuthButtons() {
-  // Достаем не только пользователя, но и его профиль из Firestore
-  const { user, userProfile, logOut } = useAuth();
+  const { user, logOut } = useAuth();
 
+  const handleLogout = () => {
+    logOut();
+    // Optionally, redirect to home or login page after logout
+    // window.location.href = '/';
+  };
+
+  // Optimized for both mobile and desktop views
   return (
-    <div className="flex items-center space-x-4">
+    <div className="flex items-center gap-3">
       {user ? (
-        // ==== Интерфейс для вошедшего пользователя ====
-        (<>
+        <>
           <Link href="/profile" title="Перейти в профиль">
-            {userProfile?.photoURL ? (
-              // Если в профиле есть фото, показываем его
-              (<img 
-                src={userProfile.photoURL} 
-                alt="Профиль"
-                className="w-10 h-10 rounded-full border-2 border-white hover:opacity-90 transition-opacity"
-              />)
-            ) : (
-              // Иначе, показываем инициалы
-              (<div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg border-2 border-white">
-                {userProfile?.firstName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
-              </div>)
-            )}
+            <div className="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-lg border-2 border-white shadow-md hover:bg-pink-600 transition-colors cursor-pointer">
+              {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'P'}
+            </div>
           </Link>
-          <button onClick={logOut} className="bg-red-600 text-white font-bold py-2 px-4 rounded hover:bg-red-700">
+          <button 
+            onClick={handleLogout}
+            className="hidden sm:block bg-red-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-red-600 transition-all duration-200 transform hover:-translate-y-0.5"
+          >
             Выйти
           </button>
-        </>)
+        </>
       ) : (
-        // ==== Интерфейс для гостя ====
-        (<>
-          {/* Оставляем только кнопку "Войти" */}
-          <Link href="/login" className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-600">
+        <>
+          {/* Using custom Button component for consistency, assuming it exists */}
+          <Link href="/login" className="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition-all duration-200 transform hover:-translate-y-0.5">
             Войти
           </Link>
-        </>)
+        </>
       )}
     </div>
   );

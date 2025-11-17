@@ -3,10 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import BoardItemCard from '../components/BoardItemCard';
-import { getFirestore, collection, getDocs, query, orderBy } from "firebase/firestore";
-import { app } from '../../lib/firebase';
 import { useCart, BoardItem } from '../context/CartContext'; // Контекст для избранного
-import { useAuth } from '../context/AuthContext'; // Контекст для авторизации
 
 // ИЗМЕНЕНО: Добавлена вкладка "Мои"
 enum Tab {
@@ -27,21 +24,27 @@ export default function BoardPage() {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.All);
 
   const { favoriteItems } = useCart();
-  const { user } = useAuth(); // Получаем текущего пользователя
+  const user = { uid: '123' }; // Mock user
 
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const db = getFirestore(app);
-        const itemsCollection = collection(db, 'board');
-        const q = query(itemsCollection, orderBy('createdAt', 'desc'));
-        const itemSnapshot = await getDocs(q);
-        
-        const itemsList = itemSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as LocalBoardItem));
-        
+        const itemsList = [
+          {
+            id: '1',
+            title: 'Mock Item 1',
+            price: 100,
+            imageUrls: ['https://via.placeholder.com/150'],
+            userId: '123',
+          },
+          {
+            id: '2',
+            title: 'Mock Item 2',
+            price: 200,
+            imageUrls: ['https://via.placeholder.com/150'],
+            userId: '456',
+          },
+        ];
         setAllItems(itemsList);
       } catch (err) {
         console.error(err);
