@@ -5,7 +5,10 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AuthButtons from './AuthButtons';
-import { useCart } from '../context/CartContext'; // Импортируем наш хук
+import { useCart } from '../context/CartContext';
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,26 +18,53 @@ export default function Navbar() {
   const [clientCartTotal, setClientCartTotal] = useState(0);
 
   useEffect(() => {
-    // This ensures the cart total is only rendered on the client, avoiding hydration mismatches.
     setClientCartTotal(cartTotal);
   }, [cartTotal]);
 
-  // Base class for nav links for easy styling and maintenance
-  const navLinkClass = "hover:text-gray-200 transition-colors duration-200";
+  const navLinkClass = "hover:text-gray-200 transition-colors duration-200 px-4";
 
-  const navLinks = (
-    <>
-      <li><Link href="/" className={navLinkClass} onClick={() => setIsOpen(false)}>Главная</Link></li>
-      <li><Link href="/consultation" className={navLinkClass} onClick={() => setIsOpen(false)}>Консультация</Link></li>
-      <li><Link href="/urgent" className={navLinkClass} onClick={() => setIsOpen(false)}>Срочная помощь</Link></li>
-      <li><Link href="/specialist-call" className={navLinkClass} onClick={() => setIsOpen(false)}>Вызов на дом</Link></li>
-      <li><Link href="/services" className={navLinkClass} onClick={() => setIsOpen(false)}>Услуги и Цены</Link></li>
-      <li><Link href="/discharge" className={navLinkClass} onClick={() => setIsOpen(false)}>К выписке</Link></li>
-      <li><Link href="/board" className={navLinkClass} onClick={() => setIsOpen(false)}>Доска объявлений</Link></li>
-      <li><Link href="/forum" className={navLinkClass} onClick={() => setIsOpen(false)}>Форум</Link></li>
-      <li><Link href="/articles" className={navLinkClass} onClick={() => setIsOpen(false)}>Статьи</Link></li>
-    </>
-  );
+  const navLinks = [
+      { href: "/", label: "Главная" },
+      { href: "/consultation", label: "Консультация" },
+      { href: "/urgent", label: "Срочная помощь" },
+      { href: "/specialist-call", label: "Вызов на дом" },
+      { href: "/services", label: "Услуги и Цены" },
+      { href: "/discharge", label: "К выписке" },
+      { href: "/board", label: "Доска объявлений" },
+      { href: "/forum", label: "Форум" },
+      { href: "/articles", label: "Статьи" },
+  ];
+
+  const sliderSettings = {
+    dots: false,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 5,
+    slidesToScroll: 2,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 3,
+        }
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 2
+        }
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1
+        }
+      }
+    ]
+  };
 
   const cartLink = (
     <Link href="/cart" className="flex items-center space-x-2 hover:text-gray-200 transition-colors" onClick={() => setIsOpen(false)}>
@@ -47,7 +77,6 @@ export default function Navbar() {
 
   return (
     <nav className="bg-rose-400 text-white px-4 py-3 flex justify-between items-center relative z-30 shadow-lg">
-      {/* Left section: Back button and Logo */}
       <div className="flex items-center gap-4 flex-shrink-0">
         {pathname !== '/' && (
           <button onClick={() => router.back()} className="p-2 rounded-full hover:bg-rose-500 transition-colors duration-200">
@@ -64,20 +93,22 @@ export default function Navbar() {
         </Link>
       </div>
 
-      {/* Right section: Links and actions */}
+      <div className="flex-grow mx-4 overflow-hidden">
+        <Slider {...sliderSettings}>
+          {navLinks.map((link, index) => (
+            <div key={index}>
+              <Link href={link.href} className={navLinkClass} onClick={() => setIsOpen(false)}>{link.label}</Link>
+            </div>
+          ))}
+        </Slider>
+      </div>
+
       <div className="flex items-center gap-6">
-        {/* Desktop Navigation */}
-        <ul className="hidden md:flex items-center gap-x-6 font-medium">
-          {navLinks}
-        </ul>
-        
-        {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-6">
             {cartLink}
             <AuthButtons />
         </div>
 
-        {/* Mobile Actions */}
         <div className="flex items-center md:hidden gap-4">
             {cartLink}
             <button onClick={() => setIsOpen(!isOpen)} className="p-2 rounded-md hover:bg-rose-500 transition-colors duration-200">
@@ -88,12 +119,13 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu (Dropdown) */}
       {isOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-rose-400 shadow-lg">
             <div className="bg-rose-300 mt-2 mx-2 rounded-md">
                 <ul className="flex flex-col items-center gap-4 p-4 font-medium">
-                  {navLinks}
+                  {navLinks.map((link, index) => (
+                    <li key={index}><Link href={link.href} className={navLinkClass} onClick={() => setIsOpen(false)}>{link.label}</Link></li>
+                  ))}
                 </ul>
                 <div className="p-4 border-t border-white/20 flex flex-col items-center gap-4">
                     <AuthButtons />
